@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.ai.provider import get_provider
+from app.api.rate_limit import rate_limited
 from app.core.config import get_settings
 from app.db.session import get_db
 from app.documentation.models import DocumentationArtifactResult, DocumentationArtifactSummary
@@ -143,6 +144,7 @@ class DocumentationArtifactListResponse(BaseModel):
 @router.post(
     "/repositories/{repository_id}/documentation/generate",
     response_model=DocumentationArtifactResponse,
+    dependencies=[Depends(rate_limited("analysis"))],
 )
 def generate_documentation_endpoint(
     repository_id: str,

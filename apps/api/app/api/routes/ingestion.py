@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.rate_limit import rate_limited
 from app.db.session import get_db
 from app.ingestion.service import IngestionError, IngestionResult, ingest_repository
 from app.ingestion.url_policy import RepositoryURLError
@@ -40,7 +41,11 @@ class IngestRepositoryResponse(BaseModel):
         )
 
 
-@router.post("/repositories/ingest", response_model=IngestRepositoryResponse)
+@router.post(
+    "/repositories/ingest",
+    response_model=IngestRepositoryResponse,
+    dependencies=[Depends(rate_limited("ingest"))],
+)
 def ingest_repository_endpoint(
     payload: IngestRepositoryRequest, db: Annotated[Session, Depends(get_db)]
 ) -> IngestRepositoryResponse:

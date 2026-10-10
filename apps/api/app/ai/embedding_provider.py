@@ -97,8 +97,11 @@ def get_embedding_provider(
 ) -> EmbeddingProvider | None:
     """`None` (not configured, silent) vs. `AIConfigurationError` raised
     (configured incorrectly) — identical convention to
-    `app/ai/provider.py::get_provider()`."""
+    `app/ai/provider.py::get_provider()`, including returning `None` when
+    deployment policy disables AI (Settings.ai_features_allowed)."""
     settings = settings or get_settings()
+    if not settings.ai_features_allowed:
+        return None
     if not settings.embedding_api_key:
         return None
     if settings.embedding_provider != "openai":

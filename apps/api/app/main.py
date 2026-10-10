@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes.automation import router as automation_router
+from app.api.routes.capabilities import router as capabilities_router
 from app.api.routes.code import router as code_router
 from app.api.routes.documentation import router as documentation_router
 from app.api.routes.health import router as health_router
@@ -39,6 +40,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 
 app.include_router(health_router)
+app.include_router(capabilities_router)
 app.include_router(ingestion_router)
 app.include_router(impact_router)
 app.include_router(qa_router)

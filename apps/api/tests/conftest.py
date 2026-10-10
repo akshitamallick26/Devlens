@@ -6,10 +6,21 @@ If PostgreSQL isn't reachable — e.g. Docker isn't installed — the engine
 fixture skips the whole session with a clear reason rather than failing or
 silently passing. See docs/architecture/database-design.md for which parts
 of this schema have only been validated statically, without a live database.
+
+The suite runs under the explicit development configuration below, set
+before any application module reads Settings: the API's default is
+DEPLOYMENT_MODE=public_demo (docs/architecture/deployment-safety.md), and
+the behavior these tests pin down is development behavior. Tests of
+public_demo behavior switch modes with the `override_settings` fixture.
 """
 
-from collections.abc import Generator
+import os
+from collections.abc import Callable, Generator
 from datetime import UTC, datetime
+
+os.environ["DEPLOYMENT_MODE"] = "development"
+os.environ["TEST_EXECUTION_ENABLED"] = "true"
+os.environ["RATE_LIMIT_ENABLED"] = "false"
 
 import pytest
 from sqlalchemy import Engine, create_engine, text
@@ -20,6 +31,24 @@ import app.models  # noqa: F401  (registers all tables on Base.metadata)
 from app.core.config import get_settings
 from app.db.base import Base
 from app.models import AnalysisRun, Repository, RepositoryRevision, SourceBlob, SourceFile, Symbol
+
+
+@pytest.fixture
+def override_settings(monkeypatch: pytest.MonkeyPatch) -> Generator[Callable[..., None]]:
+    """Returns `apply(**env)`: sets each name as an environment variable
+    (None removes it) and rebuilds the cached Settings, so every module that
+    calls get_settings() sees the new configuration. Restored afterwards."""
+
+    def apply(**env: str | None) -> None:
+        for name, value in env.items():
+            if value is None:
+                monkeypatch.delenv(name, raising=False)
+            else:
+                monkeypatch.setenv(name, value)
+        get_settings.cache_clear()
+
+    yield apply
+    get_settings.cache_clear()
 
 
 @pytest.fixture(scope="session")

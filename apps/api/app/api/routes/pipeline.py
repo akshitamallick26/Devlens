@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.rate_limit import rate_limited
 from app.db.session import get_db
 from app.pipeline.models import PipelineResult, PipelineStatus
 from app.pipeline.service import (
@@ -54,6 +55,7 @@ class AnalyzeRevisionRequest(BaseModel):
 @router.post(
     "/repositories/{repository_id}/revisions/{revision_id}/analyze",
     response_model=PipelineResult,
+    dependencies=[Depends(rate_limited("pipeline"))],
 )
 def analyze_revision_endpoint(
     repository_id: str,

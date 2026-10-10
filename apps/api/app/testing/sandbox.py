@@ -28,6 +28,14 @@ Real enforcement of those requires OS/container-level isolation (e.g. a
 gVisor/Firecracker/network-isolated container runner) — explicitly out of
 scope for this phase, and tracked as a required later hardening phase
 rather than silently assumed away.
+
+Because of that, execution is a deployment-policy decision, not a request
+option: `run_generated_test` refuses to start a process unless
+`Settings.test_execution_allowed` (DEPLOYMENT_MODE=development and
+TEST_EXECUTION_ENABLED=true; never in public_demo). The testing route
+rejects `execute: true` with a typed 403 before any generation happens;
+this check is the last line behind it, so no caller can reach execution
+by another path. See docs/architecture/deployment-safety.md.
 """
 
 import os
@@ -39,11 +47,17 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.core.config import get_settings
 from app.testing.models import ExecutionResult
 
 DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_MAX_OUTPUT_BYTES = 64_000
 MAX_MATERIALIZED_FILES = 50
+
+
+class ExecutionDisabledError(Exception):
+    """Deployment policy forbids executing generated tests. Raised before
+    anything is materialized or any process is started."""
 
 
 class UnsafeMaterializationError(Exception):
@@ -110,7 +124,15 @@ def run_generated_test(
     directory and runs exactly that one test file under pytest — never an
     LLM-supplied command, never a caller-supplied argv. Deterministic
     command construction: always `[sys.executable, "-m", "pytest",
-    test_file.relative_path, "-q", "--no-header"]`, nothing else."""
+    test_file.relative_path, "-q", "--no-header"]`, nothing else.
+
+    Raises `ExecutionDisabledError` unless deployment policy allows
+    execution (see the module docstring)."""
+    if not get_settings().test_execution_allowed:
+        raise ExecutionDisabledError(
+            "generated-test execution is disabled by deployment policy "
+            "(requires DEPLOYMENT_MODE=development and TEST_EXECUTION_ENABLED=true)"
+        )
     all_files = [*context_files[:MAX_MATERIALIZED_FILES], test_file]
 
     tmp_dir = tempfile.mkdtemp(prefix="devlens-testexec-")

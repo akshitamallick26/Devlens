@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.rate_limit import rate_limited
 from app.automation.models import (
     AutomationRunResult,
     DeletedSymbolImpact,
@@ -401,7 +402,10 @@ class AutomationAnalysisResponse(BaseModel):
 
 
 @router.post(
-    "/repositories/{repository_id}/automation/analyze", response_model=AutomationAnalysisResponse
+    "/repositories/{repository_id}/automation/analyze",
+    response_model=AutomationAnalysisResponse,
+    # Full revision rebuilds (parsing, graph, chunking): pipeline-class cost.
+    dependencies=[Depends(rate_limited("pipeline"))],
 )
 def analyze_automation(
     repository_id: str,

@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.ai.provider import get_provider
+from app.api.rate_limit import rate_limited
 from app.core.config import get_settings
 from app.db.session import get_db
 from app.security.explanation import SecurityExplanation
@@ -230,7 +231,9 @@ class SecurityAnalysisResponse(BaseModel):
 
 
 @router.post(
-    "/repositories/{repository_id}/security/analyze", response_model=SecurityAnalysisResponse
+    "/repositories/{repository_id}/security/analyze",
+    response_model=SecurityAnalysisResponse,
+    dependencies=[Depends(rate_limited("analysis"))],
 )
 def analyze_security(
     repository_id: str,

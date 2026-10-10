@@ -309,6 +309,12 @@ Optional, each enabling one layer without affecting the deterministic core:
 | `AI_API_KEY` (Anthropic) | impact, Q&A, documentation and security explanations; test generation |
 | `EMBEDDING_API_KEY` (OpenAI) | vector and hybrid retrieval (lexical retrieval works without it) |
 | `osv-scanner`, `semgrep` on the PATH | dependency and static-analysis findings (otherwise reported as unavailable) |
+| `TEST_EXECUTION_ENABLED=true` (development only) | running generated tests, without OS-level isolation |
+
+`apps/api/.env.example` sets `DEPLOYMENT_MODE=development`. Without it the
+API runs as `public_demo`: AI off unless explicitly enabled, generated-test
+execution impossible, every write endpoint rate limited
+([deployment-safety.md](docs/architecture/deployment-safety.md)).
 
 ## Testing
 

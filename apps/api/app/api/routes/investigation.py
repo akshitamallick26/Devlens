@@ -5,15 +5,18 @@ into HTTP and serializes the pure result shapes. No ORM object is ever
 returned directly. See docs/architecture/investigation-sessions.md.
 """
 
+import json
 import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
+from app.api.rate_limit import rate_limited
 from app.db.session import get_db
 from app.investigation.models import (
+    MAX_GRAPH_CAMERA_STATE_BYTES,
     MAX_MESSAGE_PAGE_SIZE,
     MAX_RECENTS_PAGE_SIZE,
     MAX_TITLE_LENGTH,
@@ -98,6 +101,18 @@ class ContextRefRequest(BaseModel):
     finding_id: str | None = None
     graph_camera_state: dict[str, object] | None = None
     message_id: str | None = None
+
+    @field_validator("graph_camera_state")
+    @classmethod
+    def _bounded_camera_state(cls, value: dict[str, object] | None) -> dict[str, object] | None:
+        if value is not None:
+            size = len(json.dumps(value, ensure_ascii=False).encode("utf-8"))
+            if size > MAX_GRAPH_CAMERA_STATE_BYTES:
+                raise ValueError(
+                    f"graph_camera_state is {size} bytes; at most "
+                    f"{MAX_GRAPH_CAMERA_STATE_BYTES} are accepted"
+                )
+        return value
 
 
 class MessageResponse(BaseModel):
@@ -238,7 +253,11 @@ class RecentSessionsResponse(BaseModel):
         )
 
 
-@router.post("/repositories/{repository_id}/sessions", response_model=SessionResponse)
+@router.post(
+    "/repositories/{repository_id}/sessions",
+    response_model=SessionResponse,
+    dependencies=[Depends(rate_limited("session"))],
+)
 def create_session_endpoint(
     repository_id: str,
     payload: CreateSessionRequest,
@@ -287,7 +306,11 @@ def get_session_endpoint(
     return SessionResponse.from_model(snapshot)
 
 
-@router.patch("/repositories/{repository_id}/sessions/{session_id}", response_model=SessionResponse)
+@router.patch(
+    "/repositories/{repository_id}/sessions/{session_id}",
+    response_model=SessionResponse,
+    dependencies=[Depends(rate_limited("session"))],
+)
 def update_session_endpoint(
     repository_id: str,
     session_id: str,
@@ -322,6 +345,7 @@ def update_session_endpoint(
 @router.post(
     "/repositories/{repository_id}/sessions/{session_id}/messages",
     response_model=MessageResponse,
+    dependencies=[Depends(rate_limited("session"))],
 )
 def append_message_endpoint(
     repository_id: str,
@@ -341,6 +365,7 @@ def append_message_endpoint(
 @router.post(
     "/repositories/{repository_id}/sessions/{session_id}/context",
     response_model=ContextRefResponse,
+    dependencies=[Depends(rate_limited("session"))],
 )
 def add_context_ref_endpoint(
     repository_id: str,
@@ -386,6 +411,7 @@ def add_context_ref_endpoint(
 @router.delete(
     "/repositories/{repository_id}/sessions/{session_id}/context/{context_ref_id}",
     status_code=204,
+    dependencies=[Depends(rate_limited("session"))],
 )
 def remove_context_ref_endpoint(
     repository_id: str,

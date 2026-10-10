@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.embedding_provider import DEFAULT_EMBEDDING_MODEL_VERSION, get_embedding_provider
 from app.ai.provider import get_provider
+from app.api.rate_limit import rate_limited
 from app.core.config import get_settings
 from app.db.session import get_db
 from app.rag.qa import QAAnswer, QAError, ResolvedEvidence, RevisionNotFoundError, run_qa
@@ -93,7 +94,11 @@ def _resolved_to_response(
     }
 
 
-@router.post("/repositories/{repository_id}/qa", response_model=QAResponse)
+@router.post(
+    "/repositories/{repository_id}/qa",
+    response_model=QAResponse,
+    dependencies=[Depends(rate_limited("analysis"))],
+)
 def answer_question(
     repository_id: str,
     payload: QARequest,

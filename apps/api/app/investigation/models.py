@@ -25,6 +25,10 @@ MAX_MESSAGE_PAGE_SIZE = 200
 DEFAULT_RECENTS_PAGE_SIZE = 20
 MAX_RECENTS_PAGE_SIZE = 100
 MAX_CONTEXT_REFS_IN_SNAPSHOT = 500
+# graph_camera_state is stored as visitor-supplied JSON. The workstation
+# writes four short fields (~200 bytes); this bounds what one request can
+# persist, the same role MAX_MESSAGE_CONTENT_LENGTH plays for messages.
+MAX_GRAPH_CAMERA_STATE_BYTES = 4_096
 
 
 @dataclass(frozen=True)

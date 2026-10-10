@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.ai.provider import get_provider
+from app.api.rate_limit import rate_limited
 from app.core.config import get_settings
 from app.db.session import get_db
 from app.testing.models import ValidationIssue
@@ -115,6 +116,18 @@ _LIMITATIONS = (
 )
 
 
+_EXECUTION_DISABLED_DETAIL = {
+    "code": "capability_disabled",
+    "capability": "test_execution",
+    "message": (
+        "Generated-test execution is disabled on this deployment. Generated "
+        "tests run without OS-level isolation, so execution is only available "
+        "in development with TEST_EXECUTION_ENABLED=true. Request with "
+        "execute set to false to generate and validate tests without running them."
+    ),
+}
+
+
 def _parse_uuid_list(values: list[str], field_name: str) -> set[uuid.UUID]:
     try:
         return {uuid.UUID(v) for v in values}
@@ -122,7 +135,11 @@ def _parse_uuid_list(values: list[str], field_name: str) -> set[uuid.UUID]:
         raise HTTPException(status_code=422, detail=f"invalid uuid in {field_name}") from exc
 
 
-@router.post("/repositories/{repository_id}/testing/generate", response_model=GenerateTestsResponse)
+@router.post(
+    "/repositories/{repository_id}/testing/generate",
+    response_model=GenerateTestsResponse,
+    dependencies=[Depends(rate_limited("analysis"))],
+)
 def generate_tests(
     repository_id: str,
     payload: GenerateTestsRequest,
@@ -138,6 +155,11 @@ def generate_tests(
     file_ids = _parse_uuid_list(payload.file_ids, "file_ids")
 
     settings = get_settings()
+    if payload.execute and not settings.test_execution_allowed:
+        # Rejected before generation, so a refused request costs no provider
+        # call and writes nothing. sandbox.run_generated_test enforces the
+        # same policy again as the last line (ExecutionDisabledError).
+        raise HTTPException(status_code=403, detail=_EXECUTION_DISABLED_DETAIL)
     # Never called at import/startup time — only here, on an explicit
     # request. Returns None (not an error) when unconfigured.
     llm_provider = get_provider(settings)

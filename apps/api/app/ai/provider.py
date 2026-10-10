@@ -3,7 +3,9 @@ API via httpx — not the vendor SDK, to avoid adding a new dependency for
 one call shape (see docs/architecture/impact-intelligence.md section 5).
 
 `get_provider()` is the only factory callers should use. It returns `None`
-when no API key is configured at all (a normal, fully-supported state) and
+when no API key is configured at all, or when deployment policy disables AI
+(DEPLOYMENT_MODE=public_demo without PUBLIC_DEMO_AI_ENABLED; both normal,
+fully-supported states) and
 raises `AIConfigurationError` when a key *is* present but the configured
 provider name isn't supported (a user mistake worth a clear signal — see
 `AIConfigurationError`'s docstring). Never raises for the "not configured"
@@ -117,10 +119,16 @@ class AnthropicProvider:
 
 
 def get_provider(settings: Settings | None = None) -> AIProvider | None:
-    """`None` (not configured, silent) vs. `AIConfigurationError` raised
-    (configured incorrectly) — see this module's docstring and
-    `AIConfigurationError`."""
+    """`None` (not configured, or disabled by deployment policy; silent) vs.
+    `AIConfigurationError` raised (configured incorrectly) — see this
+    module's docstring and `AIConfigurationError`. Every AI call in the API
+    obtains its provider here, so this is where public_demo's "AI off
+    unless explicitly enabled" rule is enforced (Settings.ai_features_allowed,
+    docs/architecture/deployment-safety.md); callers' existing `None`
+    handling then produces their typed deterministic-only result."""
     settings = settings or get_settings()
+    if not settings.ai_features_allowed:
+        return None
     if not settings.ai_api_key:
         return None
     if settings.ai_provider != "anthropic":

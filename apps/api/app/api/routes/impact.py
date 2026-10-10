@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.models import AIConfigurationError
 from app.ai.provider import get_provider
+from app.api.rate_limit import rate_limited
 from app.db.session import get_db
 from app.impact.explanation import ImpactExplanation, generate_impact_explanation
 from app.impact.models import ImpactAnalysisResult, ImpactedFile, ImpactedSymbol, SymbolView
@@ -204,6 +205,7 @@ def _to_response(
 @router.post(
     "/repositories/{repository_id}/impact",
     response_model=ImpactAnalysisResponse,
+    dependencies=[Depends(rate_limited("analysis"))],
 )
 def analyze_impact(
     repository_id: str,

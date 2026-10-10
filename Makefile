@@ -1,4 +1,4 @@
-.PHONY: dev-web dev-api infra-up infra-down infra-logs test test-web test-api lint lint-web lint-api format
+.PHONY: dev-web dev-api infra-up infra-down infra-logs migrate migrate-down test test-web test-api lint lint-web lint-api format
 
 dev-web:
 	cd apps/web && pnpm dev
@@ -15,10 +15,16 @@ infra-down:
 infra-logs:
 	cd infra && docker compose logs -f
 
+migrate:
+	cd apps/api && uv run alembic upgrade head
+
+migrate-down:
+	cd apps/api && uv run alembic downgrade -1
+
 test: test-web test-api
 
 test-web:
-	cd apps/web && pnpm typecheck
+	cd apps/web && pnpm test && pnpm typecheck
 
 test-api:
 	cd apps/api && uv run pytest

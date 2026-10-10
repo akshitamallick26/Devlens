@@ -1,0 +1,149 @@
+.wrap {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 1;
+}
+
+.controls button {
+  height: 24px;
+  min-width: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 460px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--border);
+  stroke-dasharray: 2 4;
+}
+
+.ringLabel {
+  fill: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.edge {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.2;
+}
+
+.edgeActive {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.arrowHead {
+  fill: var(--border-strong);
+}
+
+.target circle {
+  fill: var(--accent);
+  stroke: var(--accent-strong);
+}
+
+.targetLabel {
+  fill: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.node {
+  cursor: pointer;
+  outline: none;
+}
+
+.node circle {
+  fill: var(--surface-raised);
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+}
+
+.nodeLabel {
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  /* Labels belong to their node's click target: clicking a symbol name
+     selects it (the 12px circle alone was too small a target). */
+}
+
+.nodeActive circle {
+  stroke: var(--accent-strong);
+}
+
+.nodeActive .nodeLabel {
+  fill: var(--text);
+}
+
+.node:focus-visible circle {
+  stroke: var(--accent-strong);
+  stroke-width: 3;
+}
+
+.nodeSelected circle {
+  fill: var(--accent-soft);
+  stroke: var(--accent-strong);
+  stroke-width: 2.5;
+}
+
+.legend {
+  padding: 6px 10px;
+  border-top: 1px solid var(--border);
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.edgeDim {
+  opacity: 0.25;
+}
+
+.rel-calls {
+  stroke: #5b6b78;
+}
+
+.rel-imports {
+  stroke: #4d6173;
+  stroke-dasharray: 4 3;
+}
+
+.rel-inherits {
+  stroke: #6a5f45;
+}
+
+.nodeFocus circle {
+  fill: var(--accent);
+  stroke: var(--accent-strong);
+}
+
+/* Highlight wins over relationship colouring. */
+.edge.edgeActive {
+  stroke: var(--accent);
+}

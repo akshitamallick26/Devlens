@@ -1,0 +1,735 @@
+/*
+ * Landing page only. Same palette as the workstation (globals.css), pushed
+ * darker; teal stays the single accent and amber is reserved for impact.
+ */
+.page {
+  --landing-bg: #07090b;
+  --landing-text: #e3e8ec;
+  --landing-muted: #93a0aa;
+  --landing-faint: #7d8994;
+  --landing-line: #232a31;
+  --landing-impact: #f5a857;
+  position: relative;
+  min-height: 100vh;
+  background: var(--landing-bg);
+  color: var(--landing-text);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: clip;
+}
+
+/* ---------- decorative world ---------- */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.world::after {
+  /* Edge vignette: keeps type legible over the graph. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 50%,
+    transparent 55%,
+    rgba(7, 9, 11, 0.72) 100%
+  );
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.world[data-mode="webgl"] .canvas,
+.world[data-mode="static"] .canvas {
+  animation: worldIn 1.4s ease both;
+}
+
+@keyframes worldIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 420px;
+  padding: 6px 9px;
+  border: 1px solid var(--landing-line);
+  border-radius: 3px;
+  background: rgba(10, 13, 16, 0.92);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--landing-text);
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+.tooltip span + span {
+  color: var(--landing-muted);
+  font-size: 11px;
+}
+
+/* ---------- header ---------- */
+.header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 clamp(20px, 4vw, 48px);
+  border-bottom: 1px solid rgba(35, 42, 49, 0.7);
+  background: rgba(7, 9, 11, 0.94);
+}
+
+.brand,
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand {
+  font-size: 15px;
+}
+
+.brandMark {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--accent-strong);
+  transform: rotate(45deg);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 14px;
+}
+
+.navLink {
+  color: var(--landing-muted);
+}
+
+.navLink:hover {
+  color: var(--landing-text);
+}
+
+.navCta {
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+}
+
+.navCta:hover {
+  border-color: var(--landing-muted);
+}
+
+/* ---------- narrative ---------- */
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+.scene {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  min-height: 165vh;
+  padding: 0 clamp(20px, 7vw, 112px);
+}
+
+.scene:focus {
+  outline: none;
+}
+
+.block {
+  position: sticky;
+  top: 20vh;
+  width: min(100%, 520px);
+  margin: 22vh 0 0;
+}
+
+.block::before {
+  /* Dark backing behind the text only, never a decorative fill. */
+  content: "";
+  position: absolute;
+  inset: -18% -16%;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    rgba(7, 9, 11, 0.86),
+    rgba(7, 9, 11, 0)
+  );
+  pointer-events: none;
+}
+
+.right {
+  margin-left: auto;
+}
+
+/* Dense blocks scroll normally: sticking them would hide their top or bottom. */
+.flow {
+  position: relative;
+  top: auto;
+  margin-bottom: 26vh;
+}
+
+.wide {
+  width: min(100%, 720px);
+}
+
+.step {
+  margin-bottom: 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.heading {
+  font-size: clamp(30px, 3.7vw, 52px);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.body {
+  margin-top: 20px;
+  max-width: 46ch;
+  font-size: 17px;
+  color: var(--landing-muted);
+}
+
+.note {
+  margin-top: 18px;
+  max-width: 54ch;
+  font-size: 13px;
+  color: var(--landing-faint);
+}
+
+.subheading {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.content[data-reveal-ready] [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s ease;
+}
+
+.content[data-reveal-ready] [data-reveal][data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- intro ---------- */
+.intro {
+  min-height: 115vh;
+  align-items: center;
+}
+
+.introInner {
+  max-width: 980px;
+  margin-top: -6vh;
+}
+
+.eyebrow {
+  margin-bottom: 26px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--landing-muted);
+}
+
+.title {
+  font-size: clamp(46px, 7.6vw, 112px);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.lede {
+  margin-top: 30px;
+  max-width: 38ch;
+  font-size: clamp(17px, 1.5vw, 20px);
+  color: var(--landing-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 38px;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 3px;
+  font-size: 15px;
+  font-weight: 500;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.primary {
+  background: var(--landing-text);
+  color: var(--landing-bg);
+}
+
+.primary:hover {
+  background: #ffffff;
+}
+
+.secondary {
+  border: 1px solid var(--border-strong);
+  color: var(--landing-text);
+}
+
+.secondary:hover {
+  border-color: var(--landing-muted);
+}
+
+.scrollHint {
+  position: absolute;
+  bottom: 22vh;
+  left: clamp(20px, 7vw, 112px);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--landing-faint);
+}
+
+/* ---------- code specimen ---------- */
+.specimen {
+  margin-top: 26px;
+  padding-left: 14px;
+  border-left: 1px solid var(--landing-line);
+}
+
+.specimen ul {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.specimen li {
+  display: grid;
+  gap: 1px;
+}
+
+.specimen code {
+  font-size: 13px;
+  color: var(--landing-text);
+}
+
+.specimen li span,
+.specimen figcaption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--landing-faint);
+}
+
+.specimen figcaption {
+  margin-top: 14px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+/* ---------- facts ---------- */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.facts dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--landing-faint);
+}
+
+.facts dd {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.desktopOnly {
+  display: inline;
+}
+
+/* ---------- impact ---------- */
+.impact {
+  margin-top: 26px;
+}
+
+.impactSeed {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--landing-faint);
+}
+
+.impactSeed code {
+  font-size: 13.5px;
+  color: #ffe0a6;
+}
+
+.depths {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(245, 168, 87, 0.45);
+}
+
+.depths > li {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+}
+
+.depthLabel {
+  padding-top: 1px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--landing-impact);
+  white-space: nowrap;
+}
+
+.depths ul {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.depths code {
+  font-size: 12px;
+  color: var(--landing-muted);
+}
+
+/* ---------- evidence vs generated ---------- */
+.contract {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.panelLabel {
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.facts2 {
+  padding: 16px 18px;
+  border: 1px solid rgba(108, 208, 194, 0.32);
+  border-radius: 3px;
+  background: rgba(7, 9, 11, 0.72);
+}
+
+.facts2 .panelLabel {
+  color: var(--accent-strong);
+}
+
+.facts2 ol {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.facts2 li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.facts2 li > span:last-child {
+  display: grid;
+}
+
+.evidenceId {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-strong);
+}
+
+.facts2 code {
+  font-size: 12.5px;
+}
+
+.location {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--landing-faint);
+  overflow-wrap: anywhere;
+}
+
+.generated {
+  padding: 16px 18px;
+  border: 1px dashed #3a444d;
+  border-radius: 3px;
+  background: rgba(7, 9, 11, 0.6);
+}
+
+.generated .panelLabel {
+  color: var(--landing-muted);
+}
+
+.generated ul {
+  list-style: none;
+  display: grid;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--landing-muted);
+}
+
+.generated li {
+  padding-left: 14px;
+  position: relative;
+}
+
+.generated li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 6px;
+  height: 1px;
+  background: var(--landing-faint);
+}
+
+/* ---------- quality ---------- */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 28px;
+}
+
+.list {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 14.5px;
+  color: var(--landing-muted);
+}
+
+.list li {
+  padding-left: 14px;
+  border-left: 1px solid var(--landing-line);
+}
+
+/* ---------- automation ---------- */
+.pipeline {
+  list-style: none;
+  counter-reset: stage;
+  display: grid;
+  margin-top: 26px;
+}
+
+.pipeline li {
+  counter-increment: stage;
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 0 0 16px 30px;
+  font-size: 14px;
+  color: var(--landing-muted);
+}
+
+.pipeline li::before {
+  content: counter(stage, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-strong);
+}
+
+.pipeline li::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 22px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--landing-line);
+}
+
+.pipeline li:last-child::after {
+  display: none;
+}
+
+.pipeline li span {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--landing-text);
+}
+
+/* ---------- architecture ---------- */
+.stages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 32px;
+  margin-top: 28px;
+  border-top: 1px solid var(--landing-line);
+}
+
+.stages div {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--landing-line);
+}
+
+.stages dt {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stages dd {
+  margin-top: 3px;
+  font-size: 13.5px;
+  color: var(--landing-muted);
+}
+
+/* ---------- finale ---------- */
+.finale {
+  min-height: 130vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.finaleInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wordmark {
+  font-size: 18px;
+  color: var(--landing-muted);
+}
+
+.finaleTitle {
+  margin-top: 26px;
+  font-size: clamp(40px, 6vw, 88px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.finale .actions {
+  justify-content: center;
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+  padding: 28px clamp(20px, 7vw, 112px) 40px;
+  border-top: 1px solid var(--landing-line);
+  font-size: 12.5px;
+  color: var(--landing-faint);
+  background: var(--landing-bg);
+}
+
+/* ---------- small screens: a simpler stacked narrative ---------- */
+@media (max-width: 720px) {
+  .nav {
+    gap: 14px;
+    font-size: 13px;
+  }
+
+  .scene {
+    min-height: 135vh;
+  }
+
+  .block,
+  .right,
+  .wide {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 16vh;
+    top: 12vh;
+  }
+
+  .block::before {
+    inset: -10% -8%;
+    background: radial-gradient(
+      closest-side,
+      rgba(7, 9, 11, 0.94),
+      rgba(7, 9, 11, 0.4)
+    );
+  }
+
+  .body {
+    font-size: 16px;
+  }
+
+  .contract,
+  .columns,
+  .stages {
+    grid-template-columns: 1fr;
+  }
+
+  .desktopOnly {
+    display: none;
+  }
+
+  .scrollHint {
+    bottom: 14vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    position: relative;
+    top: auto;
+  }
+}

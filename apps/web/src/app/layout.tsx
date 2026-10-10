@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "DevLens",
-  description: "DevLens — foundation stage",
+  description:
+    "Repository intelligence workstation: understand your code before you change it.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

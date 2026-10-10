@@ -1,16 +1,17 @@
-import { apiBaseUrl } from "@/lib/env";
-import styles from "./page.module.css";
+import type { Metadata } from "next";
+import { LandingPage } from "@/components/landing/LandingPage";
+
+const title = "DevLens | Understand your code before you change it";
+const description =
+  "AI-powered codebase intelligence for understanding structure, dependencies, and change impact.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  openGraph: { title, description, type: "website" },
+  twitter: { card: "summary", title, description },
+};
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <h1>DevLens</h1>
-        <p>Frontend foundation running.</p>
-        <p>
-          <code>API base URL:</code> {apiBaseUrl}
-        </p>
-      </main>
-    </div>
-  );
+  return <LandingPage />;
 }

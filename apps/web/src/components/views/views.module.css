@@ -1,0 +1,256 @@
+.page {
+  display: grid;
+  gap: 14px;
+  max-width: 1280px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.lede {
+  color: var(--text-muted);
+  max-width: 760px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .grid3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .grid2,
+  .grid3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Compact metric strip: label above value, no cards. */
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.metric {
+  display: grid;
+  gap: 2px;
+  padding: 8px 14px;
+  border-right: 1px solid var(--border);
+  min-width: 110px;
+}
+
+.metric:last-child {
+  border-right: none;
+}
+
+.metricLabel {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.metricValue {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricNull {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.grow {
+  flex: 1;
+  min-width: 220px;
+}
+
+.stack {
+  display: grid;
+  gap: 10px;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 960px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Facts vs. explanation: deterministic facts get a solid rule, model
+   prose gets a dashed one and an explicit label. */
+.factsLabel,
+.explanationLabel {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.factsLabel {
+  color: var(--accent-strong);
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.explanationLabel {
+  color: var(--info);
+  border: 1px dashed color-mix(in srgb, var(--info) 60%, transparent);
+}
+
+.explanation {
+  border: 1px dashed color-mix(in srgb, var(--info) 45%, transparent);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.explanation h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.list {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.bullets {
+  padding-left: 18px;
+  display: grid;
+  gap: 2px;
+}
+
+.listItem {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  gap: 4px 12px;
+  align-items: center;
+}
+
+.statusGrid > * {
+  min-width: 0;
+}
+
+.evidenceId {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-strong);
+}
+
+.message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.markdown {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ---------- Files explorer ---------- */
+.explorer {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .explorer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.source {
+  max-height: 620px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.source table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.lineNumber {
+  width: 1%;
+  padding: 0 10px 0 8px;
+  text-align: right;
+  color: var(--text-faint);
+  user-select: none;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.lineText {
+  padding-right: 12px;
+  white-space: pre;
+}
+
+.sourceMarked {
+  background: var(--accent-soft);
+}
+
+.sourceMarked .lineNumber {
+  color: var(--accent-strong);
+}

@@ -7,6 +7,14 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   prettierConfig,
+  {
+    rules: {
+      // TypeScript merges same-named interfaces silently; a redeclaration
+      // once fused two unrelated API shapes into one wrong type.
+      "no-redeclare": "error",
+      "no-duplicate-imports": "error",
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

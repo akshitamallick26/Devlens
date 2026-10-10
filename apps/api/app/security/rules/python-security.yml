@@ -1,0 +1,100 @@
+# DevLens local Semgrep rule pack — Security Intelligence v1, rules version 1.
+#
+# Deliberately local, fixed, and versioned (Task 4's explicit requirement):
+# app/security/semgrep.py always invokes Semgrep with exactly this file via
+# `--config <path>`, never `--config=auto`, a registry name, or a remote
+# URL — no rule is ever downloaded at scan time. Bumping "rules version"
+# above is how a future, intentional rule-set change is tracked; it is not
+# read by any code, it's a human-readable version marker for this file.
+#
+# A small, conservative set of well-established Python security patterns,
+# chosen for low false-positive risk. Not a claim of comprehensive
+# coverage — see docs/architecture for the stated v1 scope limitation.
+rules:
+  - id: devlens-python-eval-exec
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Use of eval()/exec() on dynamic input can lead to arbitrary code
+      execution if the argument is influenced by untrusted data.
+    metadata:
+      cwe: ["CWE-95"]
+      confidence: HIGH
+      references:
+        - "https://owasp.org/www-community/attacks/Code_Injection"
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: exec(...)
+
+  - id: devlens-python-subprocess-shell-true
+    languages: [python]
+    severity: ERROR
+    message: >-
+      subprocess call with shell=True risks shell injection if any part of
+      the command is influenced by untrusted input.
+    metadata:
+      cwe: ["CWE-78"]
+      confidence: HIGH
+      references:
+        - "https://owasp.org/www-community/attacks/Command_Injection"
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.run(..., shell=True, ...)
+          - pattern: subprocess.call(..., shell=True, ...)
+          - pattern: subprocess.Popen(..., shell=True, ...)
+          - pattern: subprocess.check_output(..., shell=True, ...)
+
+  - id: devlens-python-os-system
+    languages: [python]
+    severity: ERROR
+    message: >-
+      os.system() passes its argument to the shell directly — risks shell
+      injection if any part of the command is influenced by untrusted input.
+    metadata:
+      cwe: ["CWE-78"]
+      confidence: HIGH
+    patterns:
+      - pattern: os.system(...)
+
+  - id: devlens-python-pickle-load
+    languages: [python]
+    severity: WARNING
+    message: >-
+      Deserializing with pickle can execute arbitrary code if the data
+      comes from an untrusted or unauthenticated source.
+    metadata:
+      cwe: ["CWE-502"]
+      confidence: MEDIUM
+      references:
+        - "https://docs.python.org/3/library/pickle.html#module-pickle"
+    patterns:
+      - pattern-either:
+          - pattern: pickle.load(...)
+          - pattern: pickle.loads(...)
+
+  - id: devlens-python-yaml-load-unsafe
+    languages: [python]
+    severity: WARNING
+    message: >-
+      yaml.load() without an explicit safe Loader can construct arbitrary
+      Python objects from untrusted YAML. Use yaml.safe_load() instead.
+    metadata:
+      cwe: ["CWE-502"]
+      confidence: MEDIUM
+      references:
+        - "https://pyyaml.org/wiki/PyYAMLDocumentation"
+    patterns:
+      - pattern: yaml.load($DATA)
+
+  - id: devlens-python-hardcoded-secret-assignment
+    languages: [python]
+    severity: WARNING
+    message: >-
+      Possible hardcoded credential assigned directly in source. Secrets
+      should come from environment variables or a secret manager.
+    metadata:
+      cwe: ["CWE-798"]
+      confidence: LOW
+    patterns:
+      - pattern-regex: '(?i)(password|secret|api_key|access_token)\s*=\s*["\'][^"\']{4,}["\']'
